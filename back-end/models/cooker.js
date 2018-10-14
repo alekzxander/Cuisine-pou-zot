@@ -1,5 +1,6 @@
 const sequelizeDb = require('../database/db');
 const Sequelize = require('sequelize');
+const bcrypt = require('bcrypt-nodejs');
 
 const cookerModel = sequelizeDb.define('cooker', {
 
@@ -13,6 +14,11 @@ const cookerModel = sequelizeDb.define('cooker', {
     },
     email: {
         type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+    },
+    password: {
+        type: Sequelize.STRING,
         allowNull: false
     },
     presentation: {
@@ -24,5 +30,8 @@ const cookerModel = sequelizeDb.define('cooker', {
         allowNull: true
     }
 });
+cookerModel.generateHash = function (password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+};
 
 module.exports = cookerModel;

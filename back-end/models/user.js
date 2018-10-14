@@ -1,5 +1,6 @@
 const sequelizeDb = require('../database/db');
 const Sequelize = require('sequelize');
+const bcrypt = require('bcrypt-nodejs');
 
 const userModel = sequelizeDb.define('user', {
 
@@ -13,6 +14,11 @@ const userModel = sequelizeDb.define('user', {
     },
     email: {
         type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+    },
+    password: {
+        type: Sequelize.STRING,
         allowNull: false
     },
     adresse: {
@@ -25,8 +31,11 @@ const userModel = sequelizeDb.define('user', {
     },
     picture: {
         type: Sequelize.STRING,
-        allowNull: false
-    }
+        allowNull: true
+    },
 });
+userModel.generateHash = function (password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+};
 
 module.exports = userModel;

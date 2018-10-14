@@ -1,21 +1,36 @@
-const Cooker = require('../models/cooker');
-const Menu = require('../models/menu');
-const Type_has_menu = require('../models/type_has_menu');
-const Calendar = require('../models/calendar');
+const Cooker = require('../../models/cooker');
+const Menu = require('../../models/menu');
+const Type_has_menu = require('../../models/type_has_menu');
+const Calendar = require('../../models/calendar');
+const jwt = require('jsonwebtoken');
 
 const cooker = (app) => {
+
     app.post('/profil-cooker', async (req, res) => {
-        const cooker = {
-            last_name: req.body.last_name,
-            first_name: req.body.first_name,
-            email: req.body.email
-        };
-        const createCooker = await Cooker.create(cooker);
-        try {
-            res.json({ createCooker });
-        } catch (err) {
-            res.sendStatus(401)
+        const verifyCooker = await Cooker.find({
+            where: {
+                email: req.body.email
+            }
+        });
+        if (!verifyCooker) {
+            const password = Cooker.generateHash(req.body.password);
+            const cooker = {
+                last_name: req.body.lastname,
+                first_name: req.body.firstname,
+                email: req.body.email,
+                password
+            };
+            const logCooker = await Cooker.create(cooker);
+            const token = jwt.sign({ data: req.body.email, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, 'secret');
+            try {
+                res.json({ logCooker, token, type: 'cooker' });
+            } catch (err) {
+                res.sendStatus(401)
+            }
+        } else {
+            res.json({ message: 'Cooker already exist' })
         }
+
     });
     app.put('/profil-cooker', async (req, res) => {
         const cooker = await Cooker.findOne({
